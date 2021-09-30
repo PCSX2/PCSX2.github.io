@@ -1,0 +1,6 @@
+version: '3'
+
+tasks:
+  start-frontend:
+    cmds:
+      - cd docs && npx http-server
