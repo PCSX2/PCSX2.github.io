@@ -22,12 +22,16 @@ class ReleaseAsset {
 class Release {
   constructor(
     readonly version: string,
+    readonly semverMajor: number,
+    readonly semverMinor: number,
+    readonly semverPatch: number,
+    readonly description: string | undefined | null,
     readonly assets: Record<ReleasePlatform, ReleaseAsset[]>,
     readonly type: ReleaseType,
     readonly draft: boolean,
     readonly prerelease: boolean,
     readonly createdAt: Date,
-    readonly publishedAt?: Date
+    readonly publishedAt: Date | undefined | null
   ) {}
 }
 
@@ -57,6 +61,8 @@ const log: Logger = new Logger({
   name: "cache",
   type: devEnv == "dev" ? "pretty" : "json",
 });
+
+const semverRegex = /v?(\d+)\.(\d+)\.(\d+)/;
 
 const octokit = new Octokit({
   auth: process.env.GH_TOKEN,
@@ -177,25 +183,52 @@ export class ReleaseCache {
     for (var i = 0; i < releases.length; i++) {
       let release = releases[i];
       let releaseAssets = gatherReleaseAssets(release);
-      const newRelease = new Release(
-        release.tag_name,
-        releaseAssets,
-        release.prerelease ? ReleaseType.Nightly : ReleaseType.Stable,
-        release.draft,
-        release.prerelease,
-        new Date(release.created_at),
-        release.published_at == null
-          ? undefined
-          : new Date(release.published_at)
-      );
-      if (newRelease.type == ReleaseType.Nightly) {
-        newNightlyReleases.push(newRelease);
+      const semverGroups = release.tag_name.match(semverRegex);
+      if (semverGroups != null && semverGroups.length == 4) {
+        const newRelease = new Release(
+          release.tag_name,
+          Number(semverGroups[1]),
+          Number(semverGroups[2]),
+          Number(semverGroups[3]),
+          release.body,
+          releaseAssets,
+          release.prerelease ? ReleaseType.Nightly : ReleaseType.Stable,
+          release.draft,
+          release.prerelease,
+          new Date(release.created_at),
+          release.published_at == null
+            ? undefined
+            : new Date(release.published_at)
+        );
+        if (newRelease.type == ReleaseType.Nightly) {
+          newNightlyReleases.push(newRelease);
+        } else {
+          newStableReleases.push(newRelease);
+        }
       } else {
-        newStableReleases.push(newRelease);
+        log.warn("invalid semantic version", {
+          cid: cid,
+          cacheType: "main",
+          semver: release.tag_name,
+          matches: semverGroups,
+        });
       }
     }
     this.stableReleases = newStableReleases;
+    // Releases returned from github are not sorted by semantic version, but by published date -- this ensures consistency
+    this.stableReleases.sort(
+      (a, b) =>
+        b.semverMajor - a.semverMajor ||
+        b.semverMinor - a.semverMinor ||
+        b.semverPatch - a.semverPatch
+    );
     this.nightlyReleases = newNightlyReleases;
+    this.nightlyReleases.sort(
+      (a, b) =>
+        b.semverMajor - a.semverMajor ||
+        b.semverMinor - a.semverMinor ||
+        b.semverPatch - a.semverPatch
+    );
     this.combinedNightlyReleases = this.nightlyReleases.concat(
       this.legacyNightlyReleases
     );
@@ -221,21 +254,41 @@ export class ReleaseCache {
     for (var i = 0; i < legacyReleases.length; i++) {
       let release = legacyReleases[i];
       let releaseAssets = gatherReleaseAssets(release);
-      newLegacyReleases.push(
-        new Release(
-          release.tag_name,
-          releaseAssets,
-          ReleaseType.Nightly,
-          release.draft,
-          release.prerelease,
-          new Date(release.created_at),
-          release.published_at == null
-            ? undefined
-            : new Date(release.published_at)
-        )
-      );
+      const semverGroups = release.tag_name.match(semverRegex);
+      if (semverGroups != null && semverGroups.length == 4) {
+        newLegacyReleases.push(
+          new Release(
+            release.tag_name,
+            Number(semverGroups[1]),
+            Number(semverGroups[2]),
+            Number(semverGroups[3]),
+            release.body,
+            releaseAssets,
+            ReleaseType.Nightly,
+            release.draft,
+            release.prerelease,
+            new Date(release.created_at),
+            release.published_at == null
+              ? undefined
+              : new Date(release.published_at)
+          )
+        );
+      } else {
+        log.warn("invalid semantic version", {
+          cid: cid,
+          cacheType: "main",
+          semver: release.tag_name,
+          matches: semverGroups,
+        });
+      }
     }
     this.legacyNightlyReleases = newLegacyReleases;
+    this.legacyNightlyReleases.sort(
+      (a, b) =>
+        b.semverMajor - a.semverMajor ||
+        b.semverMinor - a.semverMinor ||
+        b.semverPatch - a.semverPatch
+    );
     this.combinedNightlyReleases = this.nightlyReleases.concat(
       this.legacyNightlyReleases
     );
@@ -250,7 +303,7 @@ export class ReleaseCache {
       `
       fragment pr on PullRequest {
         number
-        headRepositoryOwner {
+        author {
           login
         }
         updatedAt
@@ -325,7 +378,7 @@ export class ReleaseCache {
               new PullRequest(
                 pr.number,
                 pr.permalink,
-                pr.headRepositoryOwner.login,
+                pr.author.login,
                 new Date(pr.updatedAt),
                 pr.body,
                 pr.title,

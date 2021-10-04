@@ -18,12 +18,20 @@ if (ghWebhookSecret == undefined) {
 }
 
 import express from "express";
+import cors from "cors";
+
+var corsOptions = {
+  origin: devEnv ? "http://localhost:8080" : process.env.CORS_FRONTEND_URL,
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
 import { ReleaseCache } from "./models/ReleaseCache";
 import { exit } from "process";
 
 const rateLimit = require("express-rate-limit");
 
 const app = express();
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
@@ -214,6 +222,5 @@ app.listen(3000, async () => {
   releaseCache.refreshLegacyReleaseCache(cid);
   log.info("Cache Initialized, Serving...", {
     port: 3000,
-    corsEnabled: false,
   });
 });
