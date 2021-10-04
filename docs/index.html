@@ -1,12 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  ayy lmao
-</body>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" type="image/png" href="/img/favicon.png" />
+    <link href="/css/thirdparty/mdb@3.6.0.min.css" rel="stylesheet" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+
+    <title>PCSX2 | Downloads</title>
+  </head>
+  <body>
+    <div class="d-flex flex-column min-vh-100">
+      <div id="content" class="container-fluid flex-fill">
+        <div class="container">
+          <div class="row mt-5">
+            <div class="row mt-3">
+              <h1>PCSX2 Build Downloads</h1>
+            </div>
+
+            <h2 class="release-type-title mt-3">Stable Releases</h2>
+            <p>
+              Here you'll find the latest stable releases of PCSX2. These
+              release are less frequent and as a result may exclude the latest
+              features and improvements but are recommended for the most
+              predictable user experience.
+            </p>
+            <p>
+              If you think you require something that hasn't yet made it into a
+              stable release, take a look at the nightly builds below!
+            </p>
+          </div>
+
+          <div class="row mt-3">
+            <h4>
+              Latest Version -
+              <span id="latest-stable-ver" class="version-text">??</span>
+            </h4>
+            <div class="row mt-2" id="latest-release-artifacts"></div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-12">
+              <details>
+                <summary>Release Info</summary>
+                <div id="latest-stable-notes"></div>
+              </details>
+            </div>
+          </div>
+          <div class="row mt-4">
+            <h5>Previous Releases</h5>
+          </div>
+          <div class="container mt-2" id="previous-stable-releases"></div>
+
+          <div class="row mt-5">
+            <h2 class="release-type-title">Nightly Builds</h2>
+            <p>
+              Nightly builds are less tested than a stable release and may
+              contain bugs or regressions not yet fixed. However, they do
+              contain the current up-to-date state of the project. If you need a
+              recently added feature or fix, or want to want to assist in the
+              testing process -- these are the builds for you!
+            </p>
+            <p>
+              If you think you require something that hasn't yet made it into a
+              release, take a look at the Nightly builds below!
+            </p>
+          </div>
+          <div class="row mt-3">
+            <h4>
+              Latest Version -
+              <span id="latest-nightly-ver" class="version-text">??</span>
+            </h4>
+            <div class="row mt-2" id="latest-nightly-artifacts"></div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-12">
+              <details>
+                <summary>Release Info</summary>
+                <div id="latest-nightly-notes"></div>
+              </details>
+            </div>
+          </div>
+          <div class="row mt-4">
+            <h5>Previous Nightlies</h5>
+          </div>
+          <div class="container mt-2" id="previous-nightly-builds"></div>
+
+          <div class="row mt-5">
+            <h2 class="release-type-title">Test Builds</h2>
+            <p>
+              These builds are in-progress changes yet to merge into PCSX2 and
+              become part of a Nightly build. If you would like to assist in
+              testing out these builds here is where you can get started.
+            </p>
+            <ul>
+              <li>
+                You will need a GitHub account to successfully download these builds.
+              </li>
+              <li>
+                If you discover a problem, you should leave a comment
+                explaining the problem and how to reproduce it on the Pull
+                Request itself.
+              </li>
+              <li>
+                Lastly, if you think testing is for you, consider reaching out
+                in the discord to become a more official tester!
+              </li>
+            </ul>
+          </div>
+          <div class="container mt-2 mb-5" id="pull-request-builds"></div>
+        </div>
+        <script src="/js/thirdparty/jquery@3.6.0.min.js"></script>
+        <script src="/js/thirdparty/dot@1.1.3.min.js"></script>
+        <script src="/js/thirdparty/marked.min.js"></script>
+        <script type="module" src="/js/release-page.js"></script>
+      </div>
+      <!-- <div class="container text-center mt-5 mb-5 p-5 ad">Advertisement</div> -->
+      <div class="footer">
+        <div class="container p-3 text-center">Copyright PCSX2 - 2021</div>
+      </div>
+      <script src="/js/thirdparty/mdb@3.3.0.min.js"></script>
+    </div>
+  </body>
 </html>
