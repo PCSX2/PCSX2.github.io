@@ -59,7 +59,7 @@ Octokit.plugin(retry);
 var devEnv = process.env.NODE_ENV || "dev";
 const log: Logger = new Logger({
   name: "cache",
-  type: devEnv == "dev" ? "pretty" : "json",
+  type: devEnv ? "pretty" : "json",
 });
 
 const semverRegex = /v?(\d+)\.(\d+)\.(\d+)/;

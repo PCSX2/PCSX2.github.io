@@ -5,8 +5,11 @@
   "main": "index.js",
   "scripts": {
     "serve": "ts-node index.ts",
-    "prepack": "tsc --project ./",
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "start": "node ./dist/index.js"
+  },
+  "engines": {
+    "node": "14.x"
   },
   "keywords": [],
   "author": "",

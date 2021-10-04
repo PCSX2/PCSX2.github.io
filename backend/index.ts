@@ -6,10 +6,10 @@ import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
 
 import { Logger } from "tslog";
-var devEnv = process.env.NODE_ENV || "dev";
+var devEnv = process.env.NODE_ENV == "dev";
 const log: Logger = new Logger({
   name: "router",
-  type: devEnv == "dev" ? "pretty" : "json",
+  type: devEnv ? "pretty" : "json",
 });
 
 const ghWebhookSecret = process.env.GH_WEBHOOK_SECRET;
@@ -221,6 +221,6 @@ app.listen(3000, async () => {
   // build up legacy releases in the background
   releaseCache.refreshLegacyReleaseCache(cid);
   log.info("Cache Initialized, Serving...", {
-    port: 3000,
+    port: Number(process.env.PORT),
   });
 });
