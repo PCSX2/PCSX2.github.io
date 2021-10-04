@@ -7,3 +7,4 @@ This repository has two main things
 ## Developing on the Backend
 
 - TODO
+- `git subtree push --prefix backend heroku master`

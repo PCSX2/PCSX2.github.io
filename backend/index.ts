@@ -115,9 +115,9 @@ app.get("/latestReleasesAndPullRequests", (req, res) => {
 // Drill down for specific pagination support
 app.get("/stableReleases", (req, res) => {
   const cid = uuidv4();
-  let offset = Number(req.query.offset);
-  let pageSize = Number(req.query.pageSize);
-  if (offset != undefined && offset < 0) {
+  let offset = Number(req.query.offset) || 0;
+  let pageSize = Number(req.query.pageSize) || 25;
+  if (offset < 0) {
     log.info("API error occurred - invalid offset", {
       cid: cid,
       offset: offset,
@@ -126,7 +126,7 @@ app.get("/stableReleases", (req, res) => {
     res.status(400).send("Invalid offset value");
     return;
   }
-  if (pageSize != undefined && pageSize > maxPageSize) {
+  if (pageSize > maxPageSize) {
     log.info("API error occurred - pageSize exceeded", {
       cid: cid,
       offset: offset,
@@ -145,9 +145,9 @@ app.get("/stableReleases", (req, res) => {
 
 app.get("/nightlyReleases", (req, res) => {
   const cid = uuidv4();
-  let offset = Number(req.query.offset);
-  let pageSize = Number(req.query.pageSize);
-  if (offset != undefined && offset < 0) {
+  let offset = Number(req.query.offset) || 0;
+  let pageSize = Number(req.query.pageSize) || 25;
+  if (offset < 0) {
     log.info("API error occurred - invalid offset", {
       cid: cid,
       offset: offset,
@@ -156,7 +156,7 @@ app.get("/nightlyReleases", (req, res) => {
     res.status(400).send("Invalid offset value");
     return;
   }
-  if (pageSize != undefined && pageSize > maxPageSize) {
+  if (pageSize > maxPageSize) {
     log.info("API error occurred - pageSize exceeded", {
       cid: cid,
       offset: offset,
@@ -175,9 +175,9 @@ app.get("/nightlyReleases", (req, res) => {
 
 app.get("/pullRequests", (req, res) => {
   const cid = uuidv4();
-  let offset = Number(req.query.offset);
-  let pageSize = Number(req.query.pageSize);
-  if (offset != undefined && offset < 0) {
+  let offset = Number(req.query.offset) || 0;
+  let pageSize = Number(req.query.pageSize) || 25;
+  if (offset < 0) {
     log.info("API error occurred - invalid offset", {
       cid: cid,
       offset: offset,
@@ -186,7 +186,7 @@ app.get("/pullRequests", (req, res) => {
     res.status(400).send("Invalid offset value");
     return;
   }
-  if (pageSize != undefined && pageSize > maxPageSize) {
+  if (pageSize > maxPageSize) {
     log.info("API error occurred - pageSize exceeded", {
       cid: cid,
       offset: offset,

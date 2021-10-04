@@ -403,73 +403,58 @@ export class ReleaseCache {
   // Default Page Size - 25
   public getLatestReleases(cid: string) {
     return {
-      stableReleases: this.getStableReleases(cid),
-      nightlyReleases: this.getNightlyReleases(cid),
-      pullRequestBuilds: this.getPullRequestBuilds(cid),
+      stableReleases: this.getStableReleases(cid, 0, 25),
+      nightlyReleases: this.getNightlyReleases(cid, 0, 25),
+      pullRequestBuilds: this.getPullRequestBuilds(cid, 0, 25),
     };
   }
 
-  public getStableReleases(cid: string, offset?: number, pageSize?: number) {
-    offset ??= 0;
-    pageSize ??= 25;
-
+  public getStableReleases(cid: string, offset: number, pageSize: number) {
     if (offset >= this.stableReleases.length) {
       return [];
     }
 
     let ret = [];
     for (
-      let i = 0, index = i + offset;
-      i < pageSize &&
-      i < this.stableReleases.length &&
-      index < this.stableReleases.length;
-      i++, index++
+      var i = 0;
+      i < pageSize && i + offset < this.stableReleases.length;
+      i++
     ) {
-      ret.push(this.stableReleases[index]);
+      ret.push(this.stableReleases[i + offset]);
     }
 
     return ret;
   }
 
-  public getNightlyReleases(cid: string, offset?: number, pageSize?: number) {
-    offset ??= 0;
-    pageSize ??= 25;
-
+  public getNightlyReleases(cid: string, offset: number, pageSize: number) {
     if (offset >= this.combinedNightlyReleases.length) {
       return [];
     }
 
     let ret = [];
     for (
-      let i = 0, index = i + offset;
-      i < pageSize &&
-      i < this.combinedNightlyReleases.length &&
-      index < this.combinedNightlyReleases.length;
-      i++, index++
+      var i = 0;
+      i < pageSize && i + offset < this.combinedNightlyReleases.length;
+      i++
     ) {
-      ret.push(this.combinedNightlyReleases[index]);
+      ret.push(this.combinedNightlyReleases[i + offset]);
     }
 
     return ret;
   }
 
-  public getPullRequestBuilds(cid: string, offset?: number, pageSize?: number) {
-    offset ??= 0;
-    pageSize ??= 25;
-
+  public getPullRequestBuilds(cid: string, offset: number, pageSize: number) {
     if (offset >= this.pullRequestBuilds.length) {
       return [];
     }
 
     let ret = [];
     for (
-      let i = 0, index = i + offset;
-      i < pageSize &&
-      i < this.pullRequestBuilds.length &&
-      index < this.pullRequestBuilds.length;
-      i++, index++
+      var i = 0;
+      i < pageSize && i + offset < this.pullRequestBuilds.length;
+      i++
     ) {
-      ret.push(this.pullRequestBuilds[index]);
+      ret.push(this.pullRequestBuilds[i + offset]);
     }
 
     return ret;
