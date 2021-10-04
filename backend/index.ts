@@ -213,7 +213,7 @@ app.use(function (req, res) {
   res.send(404);
 });
 
-app.listen(3000, async () => {
+app.listen(Number(process.env.PORT), async () => {
   const cid = uuidv4();
   log.info("Initializing Server Cache", { cid: cid });
   await releaseCache.refreshReleaseCache(cid);
