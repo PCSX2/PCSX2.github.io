@@ -136,6 +136,14 @@ function gatherReleaseAssets(
   for (var i = 0; i < release.assets.length; i++) {
     let asset = release.assets[i];
     let assetComponents = path.parse(asset.name).name.split("-");
+    if (assetComponents.length < 4) {
+      log.warn("invalid release asset naming", {
+        isLegacy: legacy,
+        semver: release.tag_name,
+        assetName: asset.name,
+      });
+      continue;
+    }
     let platform = assetComponents[2].toLowerCase();
     if (platform == "windows") {
       let arch = assetComponents[3];
