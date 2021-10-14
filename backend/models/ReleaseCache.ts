@@ -94,13 +94,14 @@ const octokit = new Octokit({
 });
 
 // NOTE - Depends on asset naming convention:
-// <os>-<arch>-<additional tags>.whatever
+// pcsx2-<version>-windows-<arch>-<additional tags>.whatever
 // In the case of macOS:
-// macOS-<macOS version (ie. Mojave)>-<additional tags>.whatever
+// pcsx2-<version>-macOS-<macOS version (ie. Mojave)>-<additional tags>.whatever
 // In the case of linux:
-// linux-<distro OR appimage>-<arch>-<additional tags>.whatever
+// pcsx2-<version>-linux-<distro OR appimage>-<arch>-<additional tags>.whatever
 function gatherReleaseAssets(
-  release: any
+  release: any,
+  legacy: boolean
 ): Record<ReleasePlatform, ReleaseAsset[]> {
   let assets: Record<ReleasePlatform, ReleaseAsset[]> = {
     Windows: [],
@@ -112,13 +113,31 @@ function gatherReleaseAssets(
     return assets;
   }
 
+  // All legacy builds are only windows 32 bit, we'll find it to confirm
+  if (legacy) {
+    for (var i = 0; i < release.assets.length; i++) {
+      let asset = release.assets[i];
+      if (asset.name.includes("windows")) {
+        assets.Windows.push(
+          new ReleaseAsset(
+            asset.browser_download_url,
+            `Windows 32bit`,
+            [],
+            asset.download_count
+          )
+        );
+      }
+    }
+    return assets;
+  }
+
   for (var i = 0; i < release.assets.length; i++) {
     let asset = release.assets[i];
     let assetComponents = asset.name.split(".")[0].split("-");
-    let platform = assetComponents[0].toLowerCase();
+    let platform = assetComponents[2].toLowerCase();
     if (platform == "windows") {
-      let arch = assetComponents[1];
-      let additionalTags = assetComponents.slice(2);
+      let arch = assetComponents[3];
+      let additionalTags = assetComponents.slice(4);
       assets.Windows.push(
         new ReleaseAsset(
           asset.browser_download_url,
@@ -127,9 +146,9 @@ function gatherReleaseAssets(
           asset.download_count
         )
       );
-    } else if (assetComponents[0].toLowerCase() == "linux") {
-      let distroOrAppImage = assetComponents[1];
-      let additionalTags = assetComponents.slice(2);
+    } else if (assetComponents[2].toLowerCase() == "linux") {
+      let distroOrAppImage = assetComponents[3];
+      let additionalTags = assetComponents.slice(4);
       assets.Linux.push(
         new ReleaseAsset(
           asset.browser_download_url,
@@ -138,9 +157,9 @@ function gatherReleaseAssets(
           asset.download_count
         )
       );
-    } else if (assetComponents[0].toLowerCase() == "macos") {
-      let osxVersion = assetComponents[1];
-      let additionalTags = assetComponents.slice(2);
+    } else if (assetComponents[2].toLowerCase() == "macos") {
+      let osxVersion = assetComponents[3];
+      let additionalTags = assetComponents.slice(4);
       assets.MacOS.push(
         new ReleaseAsset(
           asset.browser_download_url,
@@ -186,7 +205,7 @@ export class ReleaseCache {
       if (release.draft) {
         continue;
       }
-      let releaseAssets = gatherReleaseAssets(release);
+      let releaseAssets = gatherReleaseAssets(release, false);
       const semverGroups = release.tag_name.match(semverRegex);
       if (semverGroups != null && semverGroups.length == 4) {
         const newRelease = new Release(
@@ -262,7 +281,7 @@ export class ReleaseCache {
       if (release.draft) {
         continue;
       }
-      let releaseAssets = gatherReleaseAssets(release);
+      let releaseAssets = gatherReleaseAssets(release, true);
       const semverGroups = release.tag_name.match(semverRegex);
       if (semverGroups != null && semverGroups.length == 4) {
         newLegacyReleases.push(
