@@ -116,7 +116,7 @@ app.get("/latestReleasesAndPullRequests", (req, res) => {
 app.get("/stableReleases", (req, res) => {
   const cid = uuidv4();
   let offset = Number(req.query.offset) || 0;
-  let pageSize = Number(req.query.pageSize) || 25;
+  let pageSize = Number(req.query.pageSize) || 30;
   if (offset < 0) {
     log.info("API error occurred - invalid offset", {
       cid: cid,
@@ -146,7 +146,7 @@ app.get("/stableReleases", (req, res) => {
 app.get("/nightlyReleases", (req, res) => {
   const cid = uuidv4();
   let offset = Number(req.query.offset) || 0;
-  let pageSize = Number(req.query.pageSize) || 25;
+  let pageSize = Number(req.query.pageSize) || 30;
   if (offset < 0) {
     log.info("API error occurred - invalid offset", {
       cid: cid,
@@ -176,7 +176,7 @@ app.get("/nightlyReleases", (req, res) => {
 app.get("/pullRequests", (req, res) => {
   const cid = uuidv4();
   let offset = Number(req.query.offset) || 0;
-  let pageSize = Number(req.query.pageSize) || 25;
+  let pageSize = Number(req.query.pageSize) || 30;
   if (offset < 0) {
     log.info("API error occurred - invalid offset", {
       cid: cid,

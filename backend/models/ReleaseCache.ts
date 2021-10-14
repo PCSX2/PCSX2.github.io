@@ -22,13 +22,13 @@ class ReleaseAsset {
 class Release {
   constructor(
     readonly version: string,
+    readonly url: string,
     readonly semverMajor: number,
     readonly semverMinor: number,
     readonly semverPatch: number,
     readonly description: string | undefined | null,
     readonly assets: Record<ReleasePlatform, ReleaseAsset[]>,
     readonly type: ReleaseType,
-    readonly draft: boolean,
     readonly prerelease: boolean,
     readonly createdAt: Date,
     readonly publishedAt: Date | undefined | null
@@ -52,6 +52,7 @@ import { Octokit } from "@octokit/rest";
 import { throttling } from "@octokit/plugin-throttling";
 import { retry } from "@octokit/plugin-retry";
 import { Logger } from "tslog";
+import striptags from "striptags";
 
 Octokit.plugin(throttling);
 Octokit.plugin(retry);
@@ -182,18 +183,23 @@ export class ReleaseCache {
     let newNightlyReleases: Release[] = [];
     for (var i = 0; i < releases.length; i++) {
       let release = releases[i];
+      if (release.draft) {
+        continue;
+      }
       let releaseAssets = gatherReleaseAssets(release);
       const semverGroups = release.tag_name.match(semverRegex);
       if (semverGroups != null && semverGroups.length == 4) {
         const newRelease = new Release(
           release.tag_name,
+          release.html_url,
           Number(semverGroups[1]),
           Number(semverGroups[2]),
           Number(semverGroups[3]),
-          release.body,
+          release.body == undefined || release.body == null
+            ? release.body
+            : striptags(release.body),
           releaseAssets,
           release.prerelease ? ReleaseType.Nightly : ReleaseType.Stable,
-          release.draft,
           release.prerelease,
           new Date(release.created_at),
           release.published_at == null
@@ -253,19 +259,24 @@ export class ReleaseCache {
     let newLegacyReleases: Release[] = [];
     for (var i = 0; i < legacyReleases.length; i++) {
       let release = legacyReleases[i];
+      if (release.draft) {
+        continue;
+      }
       let releaseAssets = gatherReleaseAssets(release);
       const semverGroups = release.tag_name.match(semverRegex);
       if (semverGroups != null && semverGroups.length == 4) {
         newLegacyReleases.push(
           new Release(
             release.tag_name,
+            release.html_url,
             Number(semverGroups[1]),
             Number(semverGroups[2]),
             Number(semverGroups[3]),
-            release.body,
+            release.body == undefined || release.body == null
+              ? release.body
+              : striptags(release.body),
             releaseAssets,
             ReleaseType.Nightly,
-            release.draft,
             release.prerelease,
             new Date(release.created_at),
             release.published_at == null
@@ -380,8 +391,12 @@ export class ReleaseCache {
                 pr.permalink,
                 pr.author.login,
                 new Date(pr.updatedAt),
-                pr.body,
-                pr.title,
+                pr.body == undefined || pr.body == null
+                  ? pr.body
+                  : striptags(pr.body),
+                pr.title == undefined || pr.title == null
+                  ? pr.title
+                  : striptags(pr.title),
                 pr.additions,
                 pr.deletions
               )
@@ -400,12 +415,11 @@ export class ReleaseCache {
   }
 
   // Returns the first page of each release type in a single response
-  // Default Page Size - 25
   public getLatestReleases(cid: string) {
     return {
-      stableReleases: this.getStableReleases(cid, 0, 25),
-      nightlyReleases: this.getNightlyReleases(cid, 0, 25),
-      pullRequestBuilds: this.getPullRequestBuilds(cid, 0, 25),
+      stableReleases: this.getStableReleases(cid, 0, 30),
+      nightlyReleases: this.getNightlyReleases(cid, 0, 30),
+      pullRequestBuilds: this.getPullRequestBuilds(cid, 0, 30),
     };
   }
 
@@ -423,7 +437,12 @@ export class ReleaseCache {
       ret.push(this.stableReleases[i + offset]);
     }
 
-    return ret;
+    return {
+      data: ret,
+      pageInfo: {
+        total: this.stableReleases.length,
+      },
+    };
   }
 
   public getNightlyReleases(cid: string, offset: number, pageSize: number) {
@@ -440,7 +459,12 @@ export class ReleaseCache {
       ret.push(this.combinedNightlyReleases[i + offset]);
     }
 
-    return ret;
+    return {
+      data: ret,
+      pageInfo: {
+        total: this.combinedNightlyReleases.length,
+      },
+    };
   }
 
   public getPullRequestBuilds(cid: string, offset: number, pageSize: number) {
@@ -457,6 +481,11 @@ export class ReleaseCache {
       ret.push(this.pullRequestBuilds[i + offset]);
     }
 
-    return ret;
+    return {
+      data: ret,
+      pageInfo: {
+        total: this.pullRequestBuilds.length,
+      },
+    };
   }
 }
