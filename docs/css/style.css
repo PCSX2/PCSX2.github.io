@@ -13,6 +13,7 @@
   --secondary-color: green;
   --background-color: #191919;
   --half-background-color: #0c0c0c;
+  --half-background-color-brighter: #2b2b2b;
   --controller-triangle: #00d4ca;
   --controller-circle: #ff5653;
   --controller-cross: #8dbbf2;
@@ -139,7 +140,7 @@ a:hover {
 }
 
 .dropdown-menu {
-  background-color: var(--background-color);
+  background-color: var(--half-background-color-brighter);
 }
 
 .dropdown-item {

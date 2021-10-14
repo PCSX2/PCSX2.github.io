@@ -7,7 +7,7 @@ let latestArtifactDropdown = doT.template(`
     <button class="btn btn-primary artifact-dropdown btn-lg dropdown-toggle" type="button" id="dropdownMenuButton" data-mdb-toggle="dropdown" aria-expanded="false" {{? !it.assets.length }}disabled{{?}}>
       <i class="{{= it.icon }}"></i>&nbsp{{= it.name }}&nbsp-&nbsp{{= it.version }}
     </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
       {{~ it.assets :a }}
       <li><a class="dropdown-item" href="{{=a.url}}">{{=a.displayName}}{{~ a.additionalTags :t }} - {{=t}}{{~}}</a></li>
       {{~}}
@@ -39,7 +39,7 @@ let releaseRow = doT.template(`
     <a role="button" data-mdb-toggle="dropdown" data-mdb-ripple-duration="none">
       <i class="{{= platform.icon }} release-artifact-icon"></i>
     </a>
-    <ul class="dropdown-menu">
+    <ul class="dropdown-menu dropdown-menu-end">
     {{~ platform.assets :asset }}
       <li>
         <a class="dropdown-item" href="{{= asset.url }}">{{= asset.displayName }}{{~ asset.additionalTags :t }} - {{=t}}{{~}}</a>
@@ -247,7 +247,7 @@ function renderPreviousReleases(category, noScroll) {
       url: release.url,
       releaseDate: new Date(release.publishedAt).toLocaleDateString(),
       platforms: platforms,
-      releaseNotes: release.description == undefined ? null : marked(release.description)
+      releaseNotes: release.description == undefined ? null : marked(truncateDescription(release.description))
     };
     $(selector).append(releaseRow(templateData));
   }
@@ -258,6 +258,15 @@ function renderPreviousReleases(category, noScroll) {
       behavior: 'smooth'
     });
   }
+}
+
+function truncateDescription(description) {
+  if (description.length > 240) {
+    return `${description.substring(0, 240)}...`;
+  } else if ((description.match(/\n/g) || []).length > 4) {
+    return `${description.split("\n").slice(0, 4).join("\n")}`
+  }
+  return description;
 }
 
 function renderPullRequests(noScroll) {
@@ -376,8 +385,8 @@ async function paginationHandler(evt) {
     }
 
     if (fetchMore) {
-      if ($(tableId).html() != tableLoading) {
-        $(tableId).html(tableLoading);
+      if ($(tableId).html() != tableLoading({colspan: colspan})) {
+        $(tableId).html(tableLoading({colspan: colspan}));
       }
       const response = await fetch(`${baseURL}/${endPoint}?offset=${offset}`);
       if (response.status == 200) {
