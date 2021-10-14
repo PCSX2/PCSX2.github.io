@@ -1,0 +1,9 @@
+version: '3'
+
+tasks:
+  start-backend:
+    cmds:
+      - cd backend && npm run serve
+  start-frontend:
+    cmds:
+      - cd docs && npx http-server

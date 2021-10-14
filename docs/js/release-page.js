@@ -1,54 +1,86 @@
-let latestArtifactDropdown = doT.template(`<div class="col d-flex justify-content-center"><div class="dropdown"><button class="btn btn-primary btn-lg dropdown-toggle" type="button" id="dropdownMenuButton" data-mdb-toggle="dropdown" aria-expanded="false" {{? !it.assets.length }}disabled{{?}}><i class="{{= it.icon }}"></i>&nbsp{{= it.name }}</button><ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">{{~ it.assets :a }}<li><a class="dropdown-item" href="{{=a.url}}">{{=a.displayName}}{{~ a.additionalTags :t }} - {{=t}}{{~}}</a></li>{{~}}</ul></div></div>`)
+// TODO - future work
+// - find the latest that has downloads! (dont assume the latest will have everything)
+
+let latestArtifactDropdown = doT.template(`
+<div class="col d-flex justify-content-center">
+  <div class="dropdown">
+    <button class="btn btn-primary artifact-dropdown btn-lg dropdown-toggle" type="button" id="dropdownMenuButton" data-mdb-toggle="dropdown" aria-expanded="false" {{? !it.assets.length }}disabled{{?}}>
+      <i class="{{= it.icon }}"></i>&nbsp{{= it.name }}&nbsp-&nbsp{{= it.version }}
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      {{~ it.assets :a }}
+      <li><a class="dropdown-item" href="{{=a.url}}">{{=a.displayName}}{{~ a.additionalTags :t }} - {{=t}}{{~}}</a></li>
+      {{~}}
+    </ul>
+  </div>
+</div>`)
+
+let tableLoading = doT.template(`
+<tr style="align-content: center;text-align: center;">
+  <td colspan="{{= it.colspan}}">
+    <img class="loading-logo" src="/img/pcsx2-logo.svg">
+  </td>
+</tr>
+`)
+
+let tableMessage = doT.template(`
+<tr style="align-content: center;text-align: center;">
+  <td colspan="{{= it.colspan }}">{{= it.message }}</td>
+</tr>
+`)
 
 let releaseRow = doT.template(`
-<div class="row release-row">
-  <div class="row release-row-details">
-    <div class="col-md-auto release-tag">{{= it.releaseName }}</div>
-    <div class="col-md-auto flex-fill release-date">{{= it.releaseDate }}</div>
-    <div class="col-md-auto d-flex justify-content-end release-artifacts">
-    {{~ it.platforms :platform }}{{? platform.assets.length }}
-      <a role="button" id="language-dropdown" data-mdb-toggle="dropdown" data-mdb-ripple-duration="none">
-        <i class="{{= platform.icon }} release-artifact-icon"></i>
-      </a>
-      <ul class="dropdown-menu" id="language-dropdown-list">
-      {{~ platform.assets :asset }}
-        <li>
-          <a class="dropdown-item" href="{{= asset.url }}">{{= asset.displayName }}{{~ asset.additionalTags :t }} - {{=t}}{{~}}</a>
-        </li>
-      {{~}}
-      </ul>
-    {{?}}
+<tr>
+  <td><a href="{{= it.url}}" target="blank">{{= it.releaseName }}</a></td>
+  <td>
+  {{? it.platforms.length }}
+  {{~ it.platforms :platform }}
+    {{? platform.assets.length }}
+    <a role="button" data-mdb-toggle="dropdown" data-mdb-ripple-duration="none">
+      <i class="{{= platform.icon }} release-artifact-icon"></i>
+    </a>
+    <ul class="dropdown-menu">
+    {{~ platform.assets :asset }}
+      <li>
+        <a class="dropdown-item" href="{{= asset.url }}">{{= asset.displayName }}{{~ asset.additionalTags :t }} - {{=t}}{{~}}</a>
+      </li>
     {{~}}
-    </div>
-    <div class="col-md-auto d-flex justify-content-end align-items-center release-notes-toggle-container">
-      <a role="button" class="release-notes-toggle">Release Notes</a>
-    </div>
-  </div>
-  <div class="row release-notes mt-2">
-    <div class="col-12">{{= it.releaseNotes }}</div>
-  </div>
-</div>`);
+    </ul>
+    {{?}}
+  {{~}}
+  {{?? true }}
+  <em class="text-muted">None</em>
+  {{?}}
+  </td>
+  <td>{{= it.releaseDate }}</td>
+  <td>
+  {{? it.releaseNotes }}
+  {{= it.releaseNotes }}
+  {{?? true}}
+  <em class="text-muted">None</em>
+  {{?}}
+  </td>
+</tr>`);
 
 let pullRequestRow = doT.template(`
-<div class="row release-row">
-  <div class="row release-row-details">
-    <div class="col-md-8 pr-title">{{= it.title }}</div>
-    <div class="col-md-auto flex-fill pr-author">{{= it.authorName }}</div>
-    <div class="col-md-auto d-flex align-items-center pr-additions-deletions">
-      <i class="far fa-plus-square pr-additions"></i>&nbsp;
-      <span class="pr-additions">{{= it.additions }}</span>
-      <i class="far fa-minus-square pr-deletions"></i>&nbsp;
-      <span class="pr-deletions">{{= it.deletions }}</span>
-    </div>
-    <div class="col-md-auto d-flex justify-content-end align-items-center">
-      <a class="pr-link" href="{{= it.url }}">Github Link</a>
-    </div>
-  </div>
-</div>`);
+<tr>
+  <td>{{= it.authorName }}</td>
+  <td><a href="{{= it.url}}" target="blank">{{= it.title }}</a></td>
+  <td>{{= it.updatedAt }}</td>
+  <td>
+    <i class="far fa-plus-square pr-additions"></i>&nbsp;
+    <span class="pr-additions">{{= it.additions }}</span>
+  </td>
+  <td>
+    <i class="far fa-minus-square pr-deletions"></i>&nbsp;
+    <span class="pr-deletions">{{= it.deletions }}</span>
+  </td>
+</tr>`);
 
-let emptyPreviousReleases = doT.template(`<div class="row"><div class="col release-no-previous-text"><h5>There are no previous releases to display</h5></div></div>`);
-
-let viewMoreReleases = doT.template(`<div class="row mt-3"><div class="button d-flex justify-content-center"><a role="button" class="btn btn-outline-info" id="{{= it.domId }}">View More</a></div></div>`)
+let pageButtonTemplate = doT.template(`
+<div class="col-md-auto">
+  <button type="button" class="btn btn-pagination {{=it.addClass}}" value="{{=it.val}}" {{? it.disabled }}disabled{{?}}>{{=it.val}}</button>
+</div>`)
 
 let latestRelease = undefined;
 let latestNightly = undefined;
@@ -56,206 +88,369 @@ let prevStableReleases = [];
 let prevNightlies = [];
 let passingPRs = [];
 
-let numPagesPrevStable = 1;
-let numPagesPrevNightlies = 1;
-let numPagesPassingPrs = 1;
+let pageSize = 10;
+let totalPrevStable = 0;
+let totalPrevNightly = 0;
+let totalPullRequests = 0;
+
+let currentPagePrevStable = 0;
+let currentPagePrevNightly = 0;
+let currentPagePullRequests = 0;
+
+let baseURL = location.hostname === "localhost" ? "http://localhost:3000" : "https://pcsx2-website-backend.herokuapp.com"
+
+function delay(delayInms) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(2);
+    }, delayInms);
+  });
+}
 
 $('document').ready(async function () {
-  const response = await fetch('http://localhost:3000/latestReleasesAndPullRequests');
+  const response = await fetch(`${baseURL}/latestReleasesAndPullRequests`);
+  await delay(500);
+  $('.skeleton-container').hide();
+  $('.skeleton-wrapper').hide();
+  if (response.status == 429) {
+    // rate limited
+    $("#stable-table-body").html(tableMessage({
+      colspan: 4,
+      message: "You are Being Rate-Limited - Wait and Try Again"
+    }));
+    $("#nightly-table-body").html(tableMessage({
+      colspan: 4,
+      message: "You are Being Rate-Limited - Wait and Try Again"
+    }));
+    $("#pull-request-table-body").html(tableMessage({
+      colspan: 5,
+      message: "You are Being Rate-Limited - Wait and Try Again"
+    }));
+    return;
+  } else if (response.status != 200) {
+    // unexpected error
+    $("#stable-table-body").html(tableMessage({
+      colspan: 4,
+      message: "Unexpected Error Occurred - Please Try Again Later"
+    }));
+    $("#nightly-table-body").html(tableMessage({
+      colspan: 4,
+      message: "Unexpected Error Occurred - Please Try Again Later"
+    }));
+    $("#pull-request-table-body").html(tableMessage({
+      colspan: 5,
+      message: "Unexpected Error Occurred - Please Try Again Later"
+    }));
+    return;
+  }
+
   const releasesAndBuilds = await response.json();
 
-  // Get the latest release
-  // picking the second for testing purposes...change
-  if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.length > 0) {
-    latestRelease = releasesAndBuilds.stableReleases[1];
+  if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.data.length > 0) {
+    latestRelease = releasesAndBuilds.stableReleases.data[0];
+    $('#latest-release-notes').append(`Latest stable release notes can be found <a href="${latestRelease.url}">here</a>`);
+    renderLatestRelease(latestRelease, "#latest-release-artifacts");
   }
 
-  if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.length > 1) {
-    prevStableReleases = releasesAndBuilds.stableReleases.slice(1);
+  if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.data.length > 1) {
+    prevStableReleases = releasesAndBuilds.stableReleases.data;
+    totalPrevStable = releasesAndBuilds.stableReleases.pageInfo.total;
+    renderPreviousReleases("stable", true);
   }
 
-  if ('nightlyReleases' in releasesAndBuilds && releasesAndBuilds.nightlyReleases.length > 0) {
-    latestNightly = releasesAndBuilds.nightlyReleases[0];
+  if ('nightlyReleases' in releasesAndBuilds && releasesAndBuilds.nightlyReleases.data.length > 0) {
+    latestNightly = releasesAndBuilds.nightlyReleases.data[0];
+    $('#latest-nightly-notes').append(`Latest nightly release notes can be found <a href="${latestNightly.url}">here</a>`);
+    renderLatestRelease(latestNightly, "#latest-nightly-artifacts");
   }
 
-  if ('nightlyReleases' in releasesAndBuilds && releasesAndBuilds.nightlyReleases.length > 1) {
-    prevNightlies = releasesAndBuilds.nightlyReleases.slice(1);
+  if ('nightlyReleases' in releasesAndBuilds && releasesAndBuilds.nightlyReleases.data.length > 1) {
+    prevNightlies = releasesAndBuilds.nightlyReleases.data;
+    totalPrevNightly = releasesAndBuilds.nightlyReleases.pageInfo.total;
+    renderPreviousReleases("nightly", true);
   }
 
-  if ('pullRequestBuilds' in releasesAndBuilds && releasesAndBuilds.pullRequestBuilds.length > 0) {
-    passingPRs = releasesAndBuilds.pullRequestBuilds;
+  if ('pullRequestBuilds' in releasesAndBuilds && releasesAndBuilds.pullRequestBuilds.data.length > 0) {
+    passingPRs = releasesAndBuilds.pullRequestBuilds.data;
+    totalPullRequests = releasesAndBuilds.pullRequestBuilds.pageInfo.total;
+    renderPullRequests(true);
   }
-
-  renderReleasesAndBuilds();
 });
 
-function renderReleasesAndBuilds() {
-  // Render Latest Release
+function renderLatestRelease(latestRelease, selector) {
   if (latestRelease != undefined) {
-    $('#latest-release-artifacts').html('');
-    $('#latest-stable-ver').html(latestRelease.version);
-    if (latestRelease.description != null) {
-      $('#latest-stable-notes').html(marked(latestRelease.description));
-    } else {
-      $('#latest-stable-notes').remove();
-    }
-    $('#latest-release-artifacts').append(
+    $(selector).html(
       latestArtifactDropdown({
-        assets: latestRelease.assets.Windows,
+        assets: latestRelease.assets.Windows.filter(asset => !asset.additionalTags.includes("symbols")),
         name: "Windows",
-        icon: "fab fa-windows"
+        icon: "fab fa-windows",
+        version: latestRelease.version
       }) +
       latestArtifactDropdown({
-        assets: latestRelease.assets.Linux,
+        assets: latestRelease.assets.Linux.filter(asset => !asset.additionalTags.includes("symbols")),
         name: "Linux",
-        icon: "fab fa-linux"
-      }) +
-      latestArtifactDropdown({
-        assets: latestRelease.assets.MacOS,
-        name: "MacOS",
-        icon: "fab fa-apple"
+        icon: "fab fa-linux",
+        version: latestRelease.version
       })
     );
+    // TODO - macOS
+  }
+}
+
+function renderPreviousReleases(category, noScroll) {
+  let previousReleases = prevStableReleases;
+  let currentPage = currentPagePrevStable;
+  let selector = "#stable-table-body";
+  if (category == "nightly") {
+    previousReleases = prevNightlies;
+    currentPage = currentPagePrevNightly;
+    selector = "#nightly-table-body";
   }
 
-  // Render Previous Stable Releases
-  $('#previous-stable-releases').html('');
-  if (prevStableReleases.length <= 0) {
-    $('#previous-stable-releases').append(emptyPreviousReleases());
+  $(selector).html('');
+
+  if (previousReleases.length == 0) {
+    $(selector).html(tableMessage({
+      colspan: 4,
+      message: "No Previous Releases to Display!"
+    }));
+    return;
   }
-  let maxItems = numPagesPrevStable * 5;
-  for (var i = 0; i < maxItems && i < prevStableReleases.length; i++) {
-    let release = prevStableReleases[i];
+
+  let offset = currentPage * pageSize;
+  for (var i = 0; i < pageSize && i + offset < previousReleases.length; i++) {
+    let release = previousReleases[i + offset];
+    let platforms = [];
+    if (release.assets.Windows.length > 0) {
+      platforms.push({
+        assets: release.assets.Windows.filter(asset => !asset.additionalTags.includes("symbols")),
+        name: "Windows",
+        icon: "fab fa-windows"
+      });
+    }
+    if (release.assets.Linux.length > 0) {
+      platforms.push({
+        assets: release.assets.Linux.filter(asset => !asset.additionalTags.includes("symbols")),
+        name: "Linux",
+        icon: "fab fa-linux"
+      });
+    }
+    if (release.assets.MacOS.length > 0) {
+      platforms.push({
+        assets: release.assets.MacOS.filter(asset => !asset.additionalTags.includes("symbols")),
+        name: "MacOS",
+        icon: "fab fa-apple"
+      });
+    }
     let templateData = {
       releaseName: release.version,
+      url: release.url,
       releaseDate: new Date(release.publishedAt).toLocaleDateString(),
-      platforms: [
-        {
-          assets: release.assets.Windows,
-          name: "Windows",
-          icon: "fab fa-windows"
-        }, {
-          assets: release.assets.Linux,
-          name: "Linux",
-          icon: "fab fa-linux"
-        }, {
-          assets: release.assets.MacOS,
-          name: "MacOS",
-          icon: "fab fa-apple"
-        }],
+      platforms: platforms,
       releaseNotes: release.description == undefined ? null : marked(release.description)
-    }
-    $('#previous-stable-releases').append(releaseRow(templateData));
+    };
+    $(selector).append(releaseRow(templateData));
   }
-  if (prevStableReleases.length > maxItems) {
-    $('#previous-stable-releases').append(viewMoreReleases({ domId: "view-more-stable" }));
+  renderPaginationButtons(category);
+  var elem = document.getElementById(`${category}-jump`);
+  if (elem != null && !noScroll) {
+    elem.scrollIntoView({
+      behavior: 'smooth'
+    });
   }
+}
 
-  // Render Nightly Releases
-  $('#previous-nightly-builds').html('');
-  $('#latest-nightly-ver').html(latestNightly.version);
-  if (latestRelease.description != null) {
-    $('#latest-nightly-notes').html(marked(latestNightly.description));
-  } else {
-    $('#latest-nightly-notes').remove();
-  }
-  $('#latest-nightly-artifacts').html('');
-  $('#latest-nightly-artifacts').append(
-    latestArtifactDropdown({
-      assets: latestNightly.assets.Windows,
-      name: "Windows",
-      icon: "fab fa-windows"
-    }) +
-    latestArtifactDropdown({
-      assets: latestNightly.assets.Linux,
-      name: "Linux",
-      icon: "fab fa-linux"
-    }) +
-    latestArtifactDropdown({
-      assets: latestNightly.assets.MacOS,
-      name: "MacOS",
-      icon: "fab fa-apple"
-    })
-  );
-
-  if (prevStableReleases.length <= 0) {
-    $('#previous-stable-releases').append(emptyPreviousReleases());
-  }
-  maxItems = numPagesPrevNightlies * 5;
-  for (var i = 0; i < maxItems && i < prevNightlies.length; i++) {
-    let release = prevNightlies[i];
-    let templateData = {
-      releaseName: release.version,
-      releaseDate: new Date(release.publishedAt).toLocaleDateString(),
-      platforms: [
-        {
-          assets: release.assets.Windows,
-          name: "Windows",
-          icon: "fab fa-windows"
-        }, {
-          assets: release.assets.Linux,
-          name: "Linux",
-          icon: "fab fa-linux"
-        }, {
-          assets: release.assets.MacOS,
-          name: "MacOS",
-          icon: "fab fa-apple"
-        }],
-      releaseNotes: release.description == undefined ? null : marked(release.description)
-    }
-    $('#previous-nightly-builds').append(releaseRow(templateData));
-  }
-  if (prevNightlies.length > maxItems) {
-    $('#previous-nightly-builds').append(viewMoreReleases({ domId: "view-more-nightlies" }));
-  }
-
+function renderPullRequests(noScroll) {
   // Pull Request Builds
-  $('#pull-request-builds').html('');
-  if (passingPRs.length <= 0) {
-    $('#pull-request-builds').append(emptyPreviousReleases());
+  $('#pull-request-table-body').html('');
+
+  if (passingPRs.length == 0) {
+    $("#pull-request-table-body").html(tableMessage({
+      colspan: 5,
+      message: "No Previous Releases to Display!"
+    }));
+    return;
   }
-  maxItems = numPagesPassingPrs * 5;
-  for (var i = 0; i < maxItems && i < passingPRs.length; i++) {
-    let pr = passingPRs[i];
-    $('#pull-request-builds').append(pullRequestRow({
+
+  let offset = currentPagePullRequests * pageSize;
+  for (var i = 0; i < pageSize && i + offset < passingPRs.length; i++) {
+    let pr = passingPRs[i + offset];
+    $('#pull-request-table-body').append(pullRequestRow({
       title: pr.title,
       authorName: pr.githubUser,
+      updatedAt: new Date(pr.updatedAt).toLocaleDateString(),
       additions: pr.additions,
       deletions: pr.deletions,
       url: pr.link
     }));
   }
-  if (passingPRs.length > maxItems) {
-    $('#pull-request-builds').append(viewMoreReleases({ domId: "view-more-prs" }));
+  renderPaginationButtons("pull-request");
+  var elem = document.getElementById(`pull-requests-jump`);
+  if (elem != null && !noScroll) {
+    elem.scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
+}
+
+function renderPaginationButtons(category) {
+  let totalCount = totalPrevStable;
+  let currentPage = currentPagePrevStable;
+  let selector = "#stable-pagination-container";
+  let addClass = "page-stable";
+  if (category == "nightly") {
+    totalCount = totalPrevNightly;
+    currentPage = currentPagePrevNightly;
+    selector = "#nightly-pagination-container";
+    addClass = "page-nightly";
+  } else if (category == "pull-request") {
+    totalCount = totalPullRequests;
+    currentPage = currentPagePullRequests;
+    selector = "#pull-request-pagination-container";
+    addClass = "page-pr";
   }
 
-  $("#view-more-prs").click(function () {
-    if (numPagesPassingPrs * 5 < passingPRs.length) {
-      numPagesPassingPrs++;
-    }
-    renderReleasesAndBuilds();
+  $(selector).html('');
+  if (totalCount <= 0) {
+    return;
+  }
+  let totalPages = Math.ceil(totalCount / pageSize);
+  let buttonValues = pagination(currentPage, totalPages);
+  for (var i = 0; i < buttonValues.length; i++) {
+    $(selector).append(pageButtonTemplate({
+      val: buttonValues[i],
+      disabled: buttonValues[i] === "..." || buttonValues[i] == currentPage + 1,
+      addClass: addClass
+    }));
+  }
+  $('.btn-pagination.page-stable').on('click', async function (evt) {
+    paginationHandler(evt);
   });
+  $('.btn-pagination.page-nightly').on('click', async function (evt) {
+    paginationHandler(evt);
+  });
+  $('.btn-pagination.page-pr').on('click', function (evt) {
+    paginationHandler(evt);
+  });
+}
 
-  // Event Handlers
-  $(".release-notes-toggle").click(function (elem) {
-    $(elem.target).parent().parent().parent().find('.release-notes').first().toggle();
-  });
-  $("#view-more-stable").click(function () {
-    if (numPagesPrevStable * 5 < prevStableReleases.length) {
-      numPagesPrevStable++;
+async function paginationHandler(evt) {
+  let category = "stable";
+  let tableId = "#stable-table-body";
+  let colspan = 4;
+  let endPoint = "stableReleases"
+  if (evt.target.classList.contains("page-nightly")) {
+    category = "nightly";
+    tableId = "#nightly-table-body";
+    endPoint = "nightlyReleases"
+  } else if (evt.target.classList.contains("page-pr")) {
+    category = "pull-request";
+    tableId = "#pull-request-table-body";
+    colspan = 5;
+    endPoint = "pullRequests"
+  }
+
+  evt.stopPropagation();
+  evt.stopImmediatePropagation();
+  if (evt.target.value != "...") {
+    let currentPage = 0;
+    if (category == "stable") {
+      currentPagePrevStable = parseInt(evt.target.value) - 1;
+      currentPage = currentPagePrevStable;
+    } else if (category == "nightly") {
+      currentPagePrevNightly = parseInt(evt.target.value) - 1;
+      currentPage = currentPagePrevNightly;
+    } else {
+      currentPagePullRequests = parseInt(evt.target.value) - 1;
+      currentPage = currentPagePullRequests;
     }
-    renderReleasesAndBuilds();
-  });
-  $("#view-more-nightlies").click(function () {
-    if (numPagesPrevNightlies * 5 < prevNightlies.length) {
-      numPagesPrevNightlies++;
+    let newSize = (currentPage + 1) * pageSize;
+    let offset = currentPage * pageSize;
+    let fetchMore = false;
+    if (category == "stable") {
+      fetchMore = newSize > prevStableReleases.length || prevStableReleases[offset] == undefined;
+    } else if (category == "nightly") {
+      fetchMore = newSize > prevNightlies.length || prevNightlies[offset] == undefined;
+    } else {
+      fetchMore = newSize > passingPRs.length || passingPRs[offset] == undefined
     }
-    renderReleasesAndBuilds();
-  });
-  $("#view-more-prs").click(function () {
-    if (numPagesPassingPrs * 5 < passingPRs.length) {
-      numPagesPassingPrs++;
+
+    if (fetchMore) {
+      if ($(tableId).html() != tableLoading) {
+        $(tableId).html(tableLoading);
+      }
+      const response = await fetch(`${baseURL}/${endPoint}?offset=${offset}`);
+      if (response.status == 200) {
+        const newData = await response.json();
+        if (category == "stable") {
+          fillBuildArray(prevStableReleases, newData.data, offset);
+        } else if (category == "nightly") {
+          fillBuildArray(prevNightlies, newData.data, offset);
+        } else {
+          fillBuildArray(passingPRs, newData.data, offset);
+        }
+      } else if (response.status == 429) {
+        // rate limited
+        $(tableId).html(tableMessage({
+          colspan: colspan,
+          message: "You are Being Rate-Limited - Wait and Try Again"
+        }));
+        return;
+      } else {
+        // unexpected error
+        $(tableId).html(tableMessage({
+          colspan: colspan,
+          message: "Unexpected Error Occurred - Please Try Again Later"
+        }));
+        return;
+      }
     }
-    renderReleasesAndBuilds();
-  });
+    if (category == "stable") {
+      renderPreviousReleases(category, false);
+    } else if (category == "nightly") {
+      renderPreviousReleases(category, false);
+    } else {
+      renderPullRequests(false);
+    }
+  }
+}
+
+function fillBuildArray(arr, newData, offset) {
+  // If array isn't as big as the start index, we need to fill up to that point
+  if (offset > arr.length) {
+    for (var i = 0, newSize = offset - arr.length; i < newSize; i++) {
+      arr.push(undefined);
+    }
+  }
+  // We can then fill in the array with the indices provided
+  // - if we are out of bounds, push undefined
+  // - if there is a value OTHER than undefined, skip, the user is just jumping around pages
+  for (var i = 0; i < newData.length; i++) {
+    if ((i + offset) >= arr.length) {
+      arr.push(newData[i]);
+    } else if (arr[i + offset] != undefined) {
+      continue;
+    } else {
+      arr[i + offset] = newData[i];
+    }
+  }
+}
+
+function pagination(current, total) {
+  current++;
+  if (total <= 1) return [1];
+  const center = [current - 2, current - 1, current, current + 1, current + 2],
+    filteredCenter = center.filter((p) => p > 1 && p < total),
+    includeThreeLeft = current === 5,
+    includeThreeRight = current === total - 4,
+    includeLeftDots = current > 5,
+    includeRightDots = current < total - 4;
+
+  if (includeThreeLeft) filteredCenter.unshift(2)
+  if (includeThreeRight) filteredCenter.push(total - 1)
+
+  if (includeLeftDots) filteredCenter.unshift('...');
+  if (includeRightDots) filteredCenter.push('...');
+
+  return [1, ...filteredCenter, total]
 }
