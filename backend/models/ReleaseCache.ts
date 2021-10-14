@@ -93,6 +93,8 @@ const octokit = new Octokit({
   },
 });
 
+import * as path from "path";
+
 // NOTE - Depends on asset naming convention:
 // pcsx2-<version>-windows-<arch>-<additional tags>.whatever
 // In the case of macOS:
@@ -133,7 +135,7 @@ function gatherReleaseAssets(
 
   for (var i = 0; i < release.assets.length; i++) {
     let asset = release.assets[i];
-    let assetComponents = asset.name.split(".")[0].split("-");
+    let assetComponents = path.parse(asset.name).name.split("-");
     let platform = assetComponents[2].toLowerCase();
     if (platform == "windows") {
       let arch = assetComponents[3];
