@@ -23,6 +23,24 @@
           <div class="row mt-3">
             <h1>PCSX2 Build Downloads</h1>
           </div>
+          <div class="row mt-3" id="outage-alert" style="display: none;">
+            <div class="col">
+              <div class="alert alert-danger" role="alert">
+                <p>Unable to fetch release information. This can be due to:</p>
+                <ul>
+                  <li>A critical backend service is experiencing an outage, <a href="www.TODO.com">see our status page</a></li>
+                  <li>Something unexpected has occurred</li>
+                  <li>Your IP is being rate limited</li>
+                </ul>
+                <p>With the exception of the rate limiting issue, we are likely aware of the problem and are working on it / monitoring it.</p>
+                <p>In the meantime, here are some alternate ways to find the releases:</p>
+                <ul>
+                  <li><a href="https://pcsx2.net/download.html">Stable Releases</a></li>
+                  <li><a href="https://github.com/PCSX2/pcsx2/releases">Nightly and Stable Releases</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
           <h2 class="release-type-title mt-3" id="stable-anchor">Stable Releases</h2>
           <p>
             Stable releases are infrequent but rigorously tested in comparison to the Nightly releases. Unless you
@@ -30,7 +48,7 @@
             looking for in order to get the most consistent experience.
           </p>
           <p>
-            For information on how to setup the latest release <a href="www.google.com">see here TODO</a>.
+            For information on how to setup the latest stable release, see the included documentation along with the release.
           </p>
           <p>
             If you encounter issues on the latest stable release, you can reach out for assistance on the <a
@@ -39,9 +57,6 @@
           <div class="skeleton-container">
             <div class="skeleton">
               <div class="skeleton-content">
-                <div class="skeleton-header">
-                  <div class="skeleton-line heading" style="width: 50%"></div>
-                </div>
                 <div class="skeleton-text">
                   <div class="skeleton-line" style="width: 25%"></div>
                 </div>
@@ -50,37 +65,27 @@
           </div>
           <div id="latest-release-notes"></div>
         </div>
+        <div class="row mt-5" id="latest-release-artifacts"></div>
         <div class="row skeleton-wrapper">
           <div class="col d-flex justify-content-center">
-            <div class="skeleton-container">
-              <div class="skeleton">
-                <div class="skeleton-content">
-                  <div class="skeleton-header">
-                    <div class="skeleton-line heading" style="width: 50%"></div>
-                  </div>
-                  <div class="skeleton-text">
-                    <div class="skeleton-line" style="width: 25%"></div>
-                  </div>
+            <div class="dropdown">
+              <button class="btn btn-primary artifact-dropdown btn-lg dropdown-toggle" type="button" id="dropdownMenuButton" data-mdb-toggle="dropdown" aria-expanded="false" disabled>
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
           <div class="col d-flex justify-content-center">
-            <div class="skeleton-container">
-              <div class="skeleton">
-                <div class="skeleton-content">
-                  <div class="skeleton-header">
-                    <div class="skeleton-line heading" style="width: 50%"></div>
-                  </div>
-                  <div class="skeleton-text">
-                    <div class="skeleton-line" style="width: 25%"></div>
-                  </div>
+            <div class="dropdown">
+              <button class="btn btn-primary artifact-dropdown btn-lg dropdown-toggle" type="button" id="dropdownMenuButton" data-mdb-toggle="dropdown" aria-expanded="false" disabled>
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
         </div>
-        <div class="row mt-5" id="latest-release-artifacts"></div>
         <div class="container text-center mt-5 mb-5 p-5 ad">Advertisement</div>
         <div class="row mt-5" id="stable-jump">
           <h5>Stable Release List</h5>
@@ -96,26 +101,11 @@
                   <th scope="col">Description</th>
                 </tr>
               </thead>
-              <tbody id="stable-table-body"></tbody>
+              <tbody id="stable-table-body">
+                <!-- skeleton loading -->
+                <tr> <td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 75%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 50%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 25%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 100%"></div></div></td></tr><tr> <td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 50%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 75%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 50%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 75%"></div></div></td></tr><tr> <td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 25%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 65%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 40%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 100%"></div></div></td></tr>
+              </tbody>
             </table>
-          </div>
-          <div class="skeleton-container">
-            <div class="skeleton">
-              <div class="skeleton-content">
-                <div class="skeleton-header">
-                  <div class="skeleton-line heading" style="width: 50%"></div>
-                </div>
-                <div class="skeleton-text">
-                  <div class="skeleton-line" style="width: 25%"></div>
-                  <div class="skeleton-line" style="width: 100%"></div>
-                  <div class="skeleton-line" style="width: 65%"></div>
-                  <div class="skeleton-line" style="width: 75%"></div>
-                  <div class="skeleton-line" style="width: 88%"></div>
-                  <div class="skeleton-line" style="width: 33%"></div>
-                  <div class="skeleton-line" style="width: 95%"></div>
-                </div>
-              </div>
-            </div>
           </div>
           <div class="row justify-content-end mt-3" id="stable-pagination-container"></div>
         </div>
@@ -139,9 +129,6 @@
           <div class="skeleton-container">
             <div class="skeleton">
               <div class="skeleton-content">
-                <div class="skeleton-header">
-                  <div class="skeleton-line heading" style="width: 50%"></div>
-                </div>
                 <div class="skeleton-text">
                   <div class="skeleton-line" style="width: 25%"></div>
                 </div>
@@ -150,37 +137,27 @@
           </div>
           <div id="latest-nightly-notes"></div>
         </div>
+        <div class="row mt-5" id="latest-nightly-artifacts"></div>
         <div class="row skeleton-wrapper">
           <div class="col d-flex justify-content-center">
-            <div class="skeleton-container">
-              <div class="skeleton">
-                <div class="skeleton-content">
-                  <div class="skeleton-header">
-                    <div class="skeleton-line heading" style="width: 50%"></div>
-                  </div>
-                  <div class="skeleton-text">
-                    <div class="skeleton-line" style="width: 25%"></div>
-                  </div>
+            <div class="dropdown">
+              <button class="btn btn-primary artifact-dropdown btn-lg dropdown-toggle" type="button" id="dropdownMenuButton" data-mdb-toggle="dropdown" aria-expanded="false" disabled>
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
           <div class="col d-flex justify-content-center">
-            <div class="skeleton-container">
-              <div class="skeleton">
-                <div class="skeleton-content">
-                  <div class="skeleton-header">
-                    <div class="skeleton-line heading" style="width: 50%"></div>
-                  </div>
-                  <div class="skeleton-text">
-                    <div class="skeleton-line" style="width: 25%"></div>
-                  </div>
+            <div class="dropdown">
+              <button class="btn btn-primary artifact-dropdown btn-lg dropdown-toggle" type="button" id="dropdownMenuButton" data-mdb-toggle="dropdown" aria-expanded="false" disabled>
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
         </div>
-        <div class="row mt-5" id="latest-nightly-artifacts"></div>
         <div class="container text-center mt-5 mb-5 p-5 ad">Advertisement</div>
         <div class="row mt-5" id="nightly-jump">
           <h5>Nightly Release List</h5>
@@ -196,26 +173,11 @@
                   <th scope="col">Description</th>
                 </tr>
               </thead>
-              <tbody id="nightly-table-body"></tbody>
+              <tbody id="nightly-table-body">
+                <!-- skeleton loading -->
+                <tr> <td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 75%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 50%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 25%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 100%"></div></div></td></tr><tr> <td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 50%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 75%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 50%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 75%"></div></div></td></tr><tr> <td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 25%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 65%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 40%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 100%"></div></div></td></tr>
+              </tbody>
             </table>
-          </div>
-          <div class="skeleton-container">
-            <div class="skeleton">
-              <div class="skeleton-content">
-                <div class="skeleton-header">
-                  <div class="skeleton-line heading" style="width: 50%"></div>
-                </div>
-                <div class="skeleton-text">
-                  <div class="skeleton-line" style="width: 25%"></div>
-                  <div class="skeleton-line" style="width: 100%"></div>
-                  <div class="skeleton-line" style="width: 65%"></div>
-                  <div class="skeleton-line" style="width: 75%"></div>
-                  <div class="skeleton-line" style="width: 88%"></div>
-                  <div class="skeleton-line" style="width: 33%"></div>
-                  <div class="skeleton-line" style="width: 95%"></div>
-                </div>
-              </div>
-            </div>
           </div>
           <div class="row justify-content-end mt-3" id="nightly-pagination-container"></div>
         </div>
@@ -246,26 +208,11 @@
                   <th scope="col">Deletions</th>
                 </tr>
               </thead>
-              <tbody id="pull-request-table-body"></tbody>
+              <tbody id="pull-request-table-body">
+                <!-- skeleton loading -->
+                <tr><td><div class="skeleton-text"> <div class="skeleton-line" style="width: 75%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 50%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 25%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 100%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 25%"></div></div></td></tr><tr> <td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 50%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 75%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 50%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 75%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 50%"></div></div></td></tr><tr> <td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 25%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 65%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 40%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 100%"></div></div></td><td> <div class="skeleton-text"> <div class="skeleton-line" style="width: 33%"></div></div></td></tr>
+              </tbody>
             </table>
-          </div>
-          <div class="skeleton-container">
-            <div class="skeleton">
-              <div class="skeleton-content">
-                <div class="skeleton-header">
-                  <div class="skeleton-line heading" style="width: 50%"></div>
-                </div>
-                <div class="skeleton-text">
-                  <div class="skeleton-line" style="width: 25%"></div>
-                  <div class="skeleton-line" style="width: 100%"></div>
-                  <div class="skeleton-line" style="width: 65%"></div>
-                  <div class="skeleton-line" style="width: 75%"></div>
-                  <div class="skeleton-line" style="width: 88%"></div>
-                  <div class="skeleton-line" style="width: 33%"></div>
-                  <div class="skeleton-line" style="width: 95%"></div>
-                </div>
-              </div>
-            </div>
           </div>
           <div class="row justify-content-end mt-3" id="pull-request-pagination-container"></div>
         </div>

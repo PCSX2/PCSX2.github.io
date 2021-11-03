@@ -99,6 +99,8 @@ body {
   border-top-color: var(--primary-color);
   border-top-width: 2px;
   border-top-style: solid;
+  margin-top: 10em;
+  color: var(--text-color);
 }
 
 .btn {
@@ -147,20 +149,15 @@ a:hover {
   color: var(--text-color);
 }
 
-.footer {
-  margin-top: 10em;
-  color: var(--text-color-muted);
-}
-
 thead {
   color: var(--text-color);
 }
 
-tr, .table-striped > tbody > tr:nth-of-type(2n+1) {
+tr, .table-striped > tbody > tr:nth-of-type(2n) {
   color: var(--text-color);
 }
 
-tbody > tr:nth-of-type(2n+1) {
+tbody > tr:nth-of-type(2n) {
   background-color: var(--half-background-color);
 }
 
@@ -289,4 +286,11 @@ details > div {
 
 .skeleton {
   background-color: var(--background-color);
+}
+
+.btn > .spinner-border {
+  width: 1em;
+  height: 1em;
+  margin-left: 1em;
+  margin-right: 1em;
 }

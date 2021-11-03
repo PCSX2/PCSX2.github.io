@@ -108,72 +108,76 @@ function delay(delayInms) {
 }
 
 $('document').ready(async function () {
-  const response = await fetch(`${baseURL}/latestReleasesAndPullRequests`);
-  await delay(500);
-  $('.skeleton-container').hide();
-  $('.skeleton-wrapper').hide();
-  if (response.status == 429) {
-    // rate limited
-    $("#stable-table-body").html(tableMessage({
-      colspan: 4,
-      message: "You are Being Rate-Limited - Wait and Try Again"
-    }));
-    $("#nightly-table-body").html(tableMessage({
-      colspan: 4,
-      message: "You are Being Rate-Limited - Wait and Try Again"
-    }));
-    $("#pull-request-table-body").html(tableMessage({
-      colspan: 5,
-      message: "You are Being Rate-Limited - Wait and Try Again"
-    }));
-    return;
-  } else if (response.status != 200) {
-    // unexpected error
-    $("#stable-table-body").html(tableMessage({
-      colspan: 4,
-      message: "Unexpected Error Occurred - Please Try Again Later"
-    }));
-    $("#nightly-table-body").html(tableMessage({
-      colspan: 4,
-      message: "Unexpected Error Occurred - Please Try Again Later"
-    }));
-    $("#pull-request-table-body").html(tableMessage({
-      colspan: 5,
-      message: "Unexpected Error Occurred - Please Try Again Later"
-    }));
-    return;
-  }
+  try {
+    const response = await fetch(`${baseURL}/latestReleasesAndPullRequests`);
+    await delay(500);
+    $('.skeleton-container').hide();
+    $('.skeleton-wrapper').hide();
+    if (response.status == 429) {
+      // rate limited
+      $("#stable-table-body").html(tableMessage({
+        colspan: 4,
+        message: "You are Being Rate-Limited - Wait and Try Again"
+      }));
+      $("#nightly-table-body").html(tableMessage({
+        colspan: 4,
+        message: "You are Being Rate-Limited - Wait and Try Again"
+      }));
+      $("#pull-request-table-body").html(tableMessage({
+        colspan: 5,
+        message: "You are Being Rate-Limited - Wait and Try Again"
+      }));
+      return;
+    } else if (response.status != 200) {
+      // unexpected error
+      $("#stable-table-body").html(tableMessage({
+        colspan: 4,
+        message: "Unexpected Error Occurred - Please Try Again Later"
+      }));
+      $("#nightly-table-body").html(tableMessage({
+        colspan: 4,
+        message: "Unexpected Error Occurred - Please Try Again Later"
+      }));
+      $("#pull-request-table-body").html(tableMessage({
+        colspan: 5,
+        message: "Unexpected Error Occurred - Please Try Again Later"
+      }));
+      return;
+    }
 
-  const releasesAndBuilds = await response.json();
+    const releasesAndBuilds = await response.json();
 
-  if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.data.length > 0) {
-    latestRelease = releasesAndBuilds.stableReleases.data[0];
-    $('#latest-release-notes').append(`Latest stable release notes can be found <a href="${latestRelease.url}">here</a>`);
-    renderLatestRelease(latestRelease, "#latest-release-artifacts");
-  }
+    if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.data.length > 0) {
+      latestRelease = releasesAndBuilds.stableReleases.data[0];
+      $('#latest-release-notes').append(`Latest stable release notes can be found <a href="${latestRelease.url}">here</a>`);
+      renderLatestRelease(latestRelease, "#latest-release-artifacts");
+    }
 
-  if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.data.length > 1) {
-    prevStableReleases = releasesAndBuilds.stableReleases.data;
-    totalPrevStable = releasesAndBuilds.stableReleases.pageInfo.total;
-    renderPreviousReleases("stable", true);
-  }
+    if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.data.length > 1) {
+      prevStableReleases = releasesAndBuilds.stableReleases.data;
+      totalPrevStable = releasesAndBuilds.stableReleases.pageInfo.total;
+      renderPreviousReleases("stable", true);
+    }
 
-  if ('nightlyReleases' in releasesAndBuilds && releasesAndBuilds.nightlyReleases.data.length > 0) {
-    latestNightly = releasesAndBuilds.nightlyReleases.data[0];
-    $('#latest-nightly-notes').append(`Latest nightly release notes can be found <a href="${latestNightly.url}">here</a>`);
-    renderLatestRelease(latestNightly, "#latest-nightly-artifacts");
-  }
+    if ('nightlyReleases' in releasesAndBuilds && releasesAndBuilds.nightlyReleases.data.length > 0) {
+      latestNightly = releasesAndBuilds.nightlyReleases.data[0];
+      $('#latest-nightly-notes').append(`Latest nightly release notes can be found <a href="${latestNightly.url}">here</a>`);
+      renderLatestRelease(latestNightly, "#latest-nightly-artifacts");
+    }
 
-  if ('nightlyReleases' in releasesAndBuilds && releasesAndBuilds.nightlyReleases.data.length > 1) {
-    prevNightlies = releasesAndBuilds.nightlyReleases.data;
-    totalPrevNightly = releasesAndBuilds.nightlyReleases.pageInfo.total;
-    renderPreviousReleases("nightly", true);
-  }
+    if ('nightlyReleases' in releasesAndBuilds && releasesAndBuilds.nightlyReleases.data.length > 1) {
+      prevNightlies = releasesAndBuilds.nightlyReleases.data;
+      totalPrevNightly = releasesAndBuilds.nightlyReleases.pageInfo.total;
+      renderPreviousReleases("nightly", true);
+    }
 
-  if ('pullRequestBuilds' in releasesAndBuilds && releasesAndBuilds.pullRequestBuilds.data.length > 0) {
-    passingPRs = releasesAndBuilds.pullRequestBuilds.data;
-    totalPullRequests = releasesAndBuilds.pullRequestBuilds.pageInfo.total;
-    renderPullRequests(true);
+    if ('pullRequestBuilds' in releasesAndBuilds && releasesAndBuilds.pullRequestBuilds.data.length > 0) {
+      passingPRs = releasesAndBuilds.pullRequestBuilds.data;
+      totalPullRequests = releasesAndBuilds.pullRequestBuilds.pageInfo.total;
+      renderPullRequests(true);
+    }
+  } catch (e) {
+    $('#outage-alert').show();
   }
 });
 
