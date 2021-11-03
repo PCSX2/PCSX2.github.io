@@ -1,16 +1,31 @@
 import dotenv from "dotenv";
 dotenv.config();
+var devEnv = process.env.NODE_ENV !== "production";
 
 import { v4 as uuidv4 } from "uuid";
 
 import crypto from "crypto";
 
-import { Logger } from "tslog";
-var devEnv = process.env.NODE_ENV == "dev";
-const log: Logger = new Logger({
-  name: "router",
-  type: devEnv ? "pretty" : "json",
+const logdnaWinston = require("logdna-winston");
+import winston from "winston";
+const log = winston.createLogger({
+  defaultMeta: { service: "main" },
 });
+log.add(
+  new winston.transports.Console({
+    format: winston.format.simple(),
+  })
+);
+
+if (!devEnv) {
+  console.log("Piping logs to LogDNA as well");
+  const options = {
+    key: process.env.LOGDNA_APIKEY,
+    app: "pcsx2-backend",
+    env: devEnv ? "dev" : "prod",
+  };
+  log.add(new logdnaWinston(options));
+}
 
 const ghWebhookSecret = process.env.GH_WEBHOOK_SECRET;
 if (ghWebhookSecret == undefined) {
@@ -36,11 +51,17 @@ app.use(express.json());
 
 // Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
 // see https://expressjs.com/en/guide/behind-proxies.html
-app.set("trust proxy", 1);
+// app.set("trust proxy", 1);
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minutes
   max: 30, // limit each IP to 30 requests per minute
+  onLimitReached: function (req: any, res: any, options: any) {
+    log.warn("rate limit hit", {
+      ip: req.ip,
+      url: req.url,
+    });
+  },
 });
 
 //  apply to all requests
@@ -80,7 +101,7 @@ app.post("/github-webhook", (req, res) => {
       // Release event
       if (
         "repository" in body &&
-        body.repository.full_name == "xTVaser/pcsx2-rr" // TODO
+        body.repository.full_name == "PCSX2/pcsx2" // TODO
       ) {
         releaseCache.refreshReleaseCache(cid);
       } else if (

@@ -9,7 +9,7 @@
     "start": "node ./dist/index.js"
   },
   "engines": {
-    "node": "14.x"
+    "node": "16.x"
   },
   "keywords": [],
   "author": "",
@@ -24,9 +24,10 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-rate-limit": "^5.4.0",
+    "logdna-winston": "^4.0.1",
     "striptags": "^3.2.0",
-    "tslog": "^3.2.2",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",

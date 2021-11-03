@@ -51,17 +51,33 @@ class PullRequest {
 import { Octokit } from "@octokit/rest";
 import { throttling } from "@octokit/plugin-throttling";
 import { retry } from "@octokit/plugin-retry";
-import { Logger } from "tslog";
 import striptags from "striptags";
 
 Octokit.plugin(throttling);
 Octokit.plugin(retry);
 
-var devEnv = process.env.NODE_ENV || "dev";
-const log: Logger = new Logger({
-  name: "cache",
-  type: devEnv ? "pretty" : "json",
+var devEnv = process.env.NODE_ENV !== "production";
+
+const logdnaWinston = require("logdna-winston");
+import winston from "winston";
+const log = winston.createLogger({
+  defaultMeta: { service: "release-cache" },
 });
+log.add(
+  new winston.transports.Console({
+    format: winston.format.simple(),
+  })
+);
+
+if (!devEnv) {
+  console.log("Piping logs to LogDNA as well");
+  const options = {
+    key: process.env.LOGDNA_APIKEY,
+    app: "pcsx2-backend",
+    env: devEnv ? "dev" : "prod",
+  };
+  log.add(new logdnaWinston(options));
+}
 
 const semverRegex = /v?(\d+)\.(\d+)\.(\d+)/;
 
@@ -203,8 +219,8 @@ export class ReleaseCache {
   public async refreshReleaseCache(cid: string): Promise<void> {
     log.info("refreshing main release cache", { cid: cid, cacheType: "main" });
     var releases = await octokit.paginate(octokit.rest.repos.listReleases, {
-      owner: "xTVaser", // TODO
-      repo: "pcsx2-rr", // TODO
+      owner: "PCSX2",
+      repo: "pcsx2",
       per_page: 100,
     });
 
