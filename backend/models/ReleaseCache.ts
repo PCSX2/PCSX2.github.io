@@ -58,7 +58,7 @@ Octokit.plugin(retry);
 
 var devEnv = process.env.NODE_ENV !== "production";
 
-const logdnaWinston = require("logdna-winston");
+const LokiTransport = require("winston-loki");
 import winston from "winston";
 const log = winston.createLogger({
   defaultMeta: { service: "release-cache" },
@@ -70,13 +70,19 @@ log.add(
 );
 
 if (!devEnv) {
-  console.log("Piping logs to LogDNA as well");
-  const options = {
-    key: process.env.LOGDNA_APIKEY,
-    app: "pcsx2-backend",
-    env: devEnv ? "dev" : "prod",
-  };
-  log.add(new logdnaWinston(options));
+  console.log("Piping logs to Grafana as well");
+  const lokiTransport = new LokiTransport({
+    host: `https://logs-prod-us-central1.grafana.net`,
+    batching: true,
+    basicAuth: `${process.env.GRAFANA_LOKI_USER}:${process.env.GRAFANA_LOKI_PASS}`,
+    labels: { app: "pcsx2-backend", env: devEnv ? "dev" : "prod" },
+    // remove color from log level label - loki really doesn't like it
+    format: winston.format.uncolorize({
+      message: false,
+      raw: false,
+    }),
+  });
+  log.add(lokiTransport);
 }
 
 const semverRegex = /v?(\d+)\.(\d+)\.(\d+)/;
