@@ -240,7 +240,16 @@ app.use(function (req, res) {
   res.send(404);
 });
 
-app.listen(Number(process.env.PORT), async () => {
+import fs from "fs";
+
+var key = fs.readFileSync(__dirname + '/../certs/ssl.key');
+var cert = fs.readFileSync(__dirname + '/../certs/ssl.crt');
+var sslOptions = { key: key, cert: cert };
+
+import https from "https";
+var httpsServer = https.createServer(sslOptions, app);
+
+httpsServer.listen(Number(process.env.PORT), async () => {
   const cid = uuidv4();
   log.info("Initializing Server Cache", { cid: cid });
   await releaseCache.refreshReleaseCache(cid);
