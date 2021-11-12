@@ -105,10 +105,7 @@ app.post("/github-webhook", (req, res) => {
       body.release.draft == true
     ) {
       // Release event
-      if (
-        "repository" in body &&
-        body.repository.full_name == "PCSX2/pcsx2" // TODO
-      ) {
+      if ("repository" in body && body.repository.full_name == "PCSX2/pcsx2") {
         releaseCache.refreshReleaseCache(cid);
       } else if (
         "repository" in body &&
@@ -234,7 +231,7 @@ app.get("/pullRequests", (req, res) => {
 
 // Default Route
 app.use(function (req, res) {
-  log.error("invalid route accessed", {
+  log.warn("invalid route accessed", {
     url: req.originalUrl,
   });
   res.send(404);
@@ -242,8 +239,8 @@ app.use(function (req, res) {
 
 import fs from "fs";
 
-var key = fs.readFileSync(__dirname + '/../certs/ssl.key');
-var cert = fs.readFileSync(__dirname + '/../certs/ssl.crt');
+var key = fs.readFileSync(__dirname + "/../certs/ssl.key");
+var cert = fs.readFileSync(__dirname + "/../certs/ssl.crt");
 var sslOptions = { key: key, cert: cert };
 
 import https from "https";
