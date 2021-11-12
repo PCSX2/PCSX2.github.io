@@ -10,18 +10,19 @@ import https from "https";
 
 const log = new LogFactory("app").getLogger();
 
-var devEnv = process.env.NODE_ENV !== "production";
+const devEnv = process.env.NODE_ENV !== "production";
 
 const ghWebhookSecret = process.env.GH_WEBHOOK_SECRET;
 if (ghWebhookSecret == undefined) {
   exit(1);
 }
 
-var corsOptions = {
+const corsOptions = {
   origin: devEnv ? "http://localhost:8080" : process.env.CORS_FRONTEND_URL,
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const rateLimit = require("express-rate-limit");
 
 const app = express();
@@ -35,6 +36,7 @@ app.set("trust proxy", 1);
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minutes
   max: 30, // limit each IP to 30 requests per minute
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   onLimitReached: function (req: any, res: any, options: any) {
     log.warn("rate limit hit", {
       ip: req.ip,
@@ -59,7 +61,7 @@ const releaseCache = new ReleaseCache();
 })();
 
 // Init Routes
-var v1Router = new RoutesV1(releaseCache);
+const v1Router = new RoutesV1(releaseCache);
 app.use("/v1", v1Router.router);
 
 // Default Route
@@ -71,10 +73,10 @@ app.use(function (req, res) {
 });
 
 if (!devEnv) {
-  var key = fs.readFileSync(__dirname + "/../certs/ssl.key");
-  var cert = fs.readFileSync(__dirname + "/../certs/ssl.crt");
-  var sslOptions = { key: key, cert: cert };
-  var httpsServer = https.createServer(sslOptions, app);
+  const key = fs.readFileSync(__dirname + "/../certs/ssl.key");
+  const cert = fs.readFileSync(__dirname + "/../certs/ssl.crt");
+  const sslOptions = { key: key, cert: cert };
+  const httpsServer = https.createServer(sslOptions, app);
   httpsServer.listen(Number(process.env.PORT), async () => {
     log.info("Cache Initialized, Serving...", {
       port: Number(process.env.PORT),

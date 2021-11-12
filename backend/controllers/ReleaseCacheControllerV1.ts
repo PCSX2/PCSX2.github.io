@@ -20,8 +20,8 @@ export class ReleaseCacheControllerV1 {
 
   getStableReleases(req: Request, resp: Response) {
     const cid = uuidv4();
-    let offset = Number(req.query.offset) || 0;
-    let pageSize = Number(req.query.pageSize) || 30;
+    const offset = Number(req.query.offset) || 0;
+    const pageSize = Number(req.query.pageSize) || 30;
     if (offset < 0) {
       this.log.info("API error occurred - invalid offset", {
         cid: cid,
@@ -52,8 +52,8 @@ export class ReleaseCacheControllerV1 {
 
   getNightlyReleases(req: Request, resp: Response) {
     const cid = uuidv4();
-    let offset = Number(req.query.offset) || 0;
-    let pageSize = Number(req.query.pageSize) || 30;
+    const offset = Number(req.query.offset) || 0;
+    const pageSize = Number(req.query.pageSize) || 30;
     if (offset < 0) {
       this.log.info("API error occurred - invalid offset", {
         cid: cid,
@@ -84,8 +84,8 @@ export class ReleaseCacheControllerV1 {
 
   getPullRequests(req: Request, resp: Response) {
     const cid = uuidv4();
-    let offset = Number(req.query.offset) || 0;
-    let pageSize = Number(req.query.pageSize) || 30;
+    const offset = Number(req.query.offset) || 0;
+    const pageSize = Number(req.query.pageSize) || 30;
     if (offset < 0) {
       this.log.info("API error occurred - invalid offset", {
         cid: cid,

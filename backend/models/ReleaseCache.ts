@@ -1,3 +1,10 @@
+import { Octokit } from "@octokit/rest";
+import { throttling } from "@octokit/plugin-throttling";
+import { retry } from "@octokit/plugin-retry";
+import striptags from "striptags";
+import * as path from "path";
+import { LogFactory } from "../utils/LogFactory";
+
 enum ReleaseType {
   Stable = 1,
   Nightly,
@@ -48,42 +55,10 @@ class PullRequest {
   ) {}
 }
 
-import { Octokit } from "@octokit/rest";
-import { throttling } from "@octokit/plugin-throttling";
-import { retry } from "@octokit/plugin-retry";
-import striptags from "striptags";
-
 Octokit.plugin(throttling);
 Octokit.plugin(retry);
 
-var devEnv = process.env.NODE_ENV !== "production";
-
-const LokiTransport = require("winston-loki");
-import winston from "winston";
-const log = winston.createLogger({
-  defaultMeta: { service: "release-cache" },
-});
-log.add(
-  new winston.transports.Console({
-    format: winston.format.simple(),
-  })
-);
-
-if (!devEnv) {
-  console.log("Piping logs to Grafana as well");
-  const lokiTransport = new LokiTransport({
-    host: `https://logs-prod-us-central1.grafana.net`,
-    batching: true,
-    basicAuth: `${process.env.GRAFANA_LOKI_USER}:${process.env.GRAFANA_LOKI_PASS}`,
-    labels: { app: "pcsx2-backend", env: devEnv ? "dev" : "prod" },
-    // remove color from log level label - loki really doesn't like it
-    format: winston.format.uncolorize({
-      message: false,
-      raw: false,
-    }),
-  });
-  log.add(lokiTransport);
-}
+const log = new LogFactory("release-cache").getLogger();
 
 const semverRegex = /v?(\d+)\.(\d+)\.(\d+)/;
 
@@ -91,7 +66,9 @@ const octokit = new Octokit({
   auth: process.env.GH_TOKEN,
   userAgent: "PCSX2/PCSX2.github.io",
   log: {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     debug: () => {},
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     info: () => {},
     warn: console.warn,
     error: console.error,
@@ -115,8 +92,6 @@ const octokit = new Octokit({
   },
 });
 
-import * as path from "path";
-
 // NOTE - Depends on asset naming convention:
 // pcsx2-<version>-windows-<arch>-<additional tags>.whatever
 // In the case of macOS:
@@ -127,7 +102,7 @@ function gatherReleaseAssets(
   release: any,
   legacy: boolean
 ): Record<ReleasePlatform, ReleaseAsset[]> {
-  let assets: Record<ReleasePlatform, ReleaseAsset[]> = {
+  const assets: Record<ReleasePlatform, ReleaseAsset[]> = {
     Windows: [],
     Linux: [],
     MacOS: [],
@@ -139,8 +114,8 @@ function gatherReleaseAssets(
 
   // All legacy builds are only windows 32 bit, we'll find it to confirm
   if (legacy) {
-    for (var i = 0; i < release.assets.length; i++) {
-      let asset = release.assets[i];
+    for (let i = 0; i < release.assets.length; i++) {
+      const asset = release.assets[i];
       if (asset.name.includes("windows")) {
         assets.Windows.push(
           new ReleaseAsset(
@@ -155,9 +130,9 @@ function gatherReleaseAssets(
     return assets;
   }
 
-  for (var i = 0; i < release.assets.length; i++) {
-    let asset = release.assets[i];
-    let assetComponents = path.parse(asset.name).name.split("-");
+  for (let i = 0; i < release.assets.length; i++) {
+    const asset = release.assets[i];
+    const assetComponents = path.parse(asset.name).name.split("-");
     if (assetComponents.length < 4) {
       log.warn("invalid release asset naming", {
         isLegacy: legacy,
@@ -166,10 +141,10 @@ function gatherReleaseAssets(
       });
       continue;
     }
-    let platform = assetComponents[2].toLowerCase();
+    const platform = assetComponents[2].toLowerCase();
     if (platform == "windows") {
-      let arch = assetComponents[3];
-      let additionalTags = assetComponents.slice(4);
+      const arch = assetComponents[3];
+      const additionalTags = assetComponents.slice(4);
       assets.Windows.push(
         new ReleaseAsset(
           asset.browser_download_url,
@@ -179,8 +154,8 @@ function gatherReleaseAssets(
         )
       );
     } else if (assetComponents[2].toLowerCase() == "linux") {
-      let distroOrAppImage = assetComponents[3];
-      let additionalTags = assetComponents.slice(4);
+      const distroOrAppImage = assetComponents[3];
+      const additionalTags = assetComponents.slice(4);
       assets.Linux.push(
         new ReleaseAsset(
           asset.browser_download_url,
@@ -190,8 +165,8 @@ function gatherReleaseAssets(
         )
       );
     } else if (assetComponents[2].toLowerCase() == "macos") {
-      let osxVersion = assetComponents[3];
-      let additionalTags = assetComponents.slice(4);
+      const osxVersion = assetComponents[3];
+      const additionalTags = assetComponents.slice(4);
       assets.MacOS.push(
         new ReleaseAsset(
           asset.browser_download_url,
@@ -224,20 +199,20 @@ export class ReleaseCache {
 
   public async refreshReleaseCache(cid: string): Promise<void> {
     log.info("refreshing main release cache", { cid: cid, cacheType: "main" });
-    var releases = await octokit.paginate(octokit.rest.repos.listReleases, {
+    const releases = await octokit.paginate(octokit.rest.repos.listReleases, {
       owner: "PCSX2",
       repo: "pcsx2",
       per_page: 100,
     });
 
-    let newStableReleases: Release[] = [];
-    let newNightlyReleases: Release[] = [];
-    for (var i = 0; i < releases.length; i++) {
-      let release = releases[i];
+    const newStableReleases: Release[] = [];
+    const newNightlyReleases: Release[] = [];
+    for (let i = 0; i < releases.length; i++) {
+      const release = releases[i];
       if (release.draft) {
         continue;
       }
-      let releaseAssets = gatherReleaseAssets(release, false);
+      const releaseAssets = gatherReleaseAssets(release, false);
       const semverGroups = release.tag_name.match(semverRegex);
       if (semverGroups != null && semverGroups.length == 4) {
         const newRelease = new Release(
@@ -298,7 +273,7 @@ export class ReleaseCache {
       cacheType: "legacy",
     });
     // First pull down the legacy releases, these are OLD nightlys
-    var legacyReleases = await octokit.paginate(
+    const legacyReleases = await octokit.paginate(
       octokit.rest.repos.listReleases,
       {
         owner: "PCSX2",
@@ -307,13 +282,13 @@ export class ReleaseCache {
       }
     );
 
-    let newLegacyReleases: Release[] = [];
-    for (var i = 0; i < legacyReleases.length; i++) {
-      let release = legacyReleases[i];
+    const newLegacyReleases: Release[] = [];
+    for (let i = 0; i < legacyReleases.length; i++) {
+      const release = legacyReleases[i];
       if (release.draft) {
         continue;
       }
-      let releaseAssets = gatherReleaseAssets(release, true);
+      const releaseAssets = gatherReleaseAssets(release, true);
       const semverGroups = release.tag_name.match(semverRegex);
       if (semverGroups != null && semverGroups.length == 4) {
         newLegacyReleases.push(
@@ -419,19 +394,19 @@ export class ReleaseCache {
     });
 
     try {
-      let paginate: boolean = true;
+      let paginate = true;
       let cursor: string | null = null;
-      let newPullRequestCache: PullRequest[] = [];
+      const newPullRequestCache: PullRequest[] = [];
       while (paginate) {
-        let resp: any = await this.grabPullRequestInfo(cursor);
+        const resp: any = await this.grabPullRequestInfo(cursor);
         if (resp.repository.pullRequests.pageInfo.hasNextPage) {
           cursor = resp.repository.pullRequests.pageInfo.endCursor;
         } else {
           paginate = false;
         }
-        for (var i = 0; i < resp.repository.pullRequests.nodes.length; i++) {
+        for (let i = 0; i < resp.repository.pullRequests.nodes.length; i++) {
           // We only care about non-draft / successfully building PRs
-          let pr = resp.repository.pullRequests.nodes[i];
+          const pr = resp.repository.pullRequests.nodes[i];
           if (pr.isDraft) {
             continue;
           }
@@ -479,9 +454,9 @@ export class ReleaseCache {
       return [];
     }
 
-    let ret = [];
+    const ret = [];
     for (
-      var i = 0;
+      let i = 0;
       i < pageSize && i + offset < this.stableReleases.length;
       i++
     ) {
@@ -501,9 +476,9 @@ export class ReleaseCache {
       return [];
     }
 
-    let ret = [];
+    const ret = [];
     for (
-      var i = 0;
+      let i = 0;
       i < pageSize && i + offset < this.combinedNightlyReleases.length;
       i++
     ) {
@@ -523,9 +498,9 @@ export class ReleaseCache {
       return [];
     }
 
-    let ret = [];
+    const ret = [];
     for (
-      var i = 0;
+      let i = 0;
       i < pageSize && i + offset < this.pullRequestBuilds.length;
       i++
     ) {
