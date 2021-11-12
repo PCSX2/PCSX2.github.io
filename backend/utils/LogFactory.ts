@@ -1,5 +1,4 @@
-const LokiTransport = require("winston-loki");
-import { exit } from "process";
+import LokiTransport from "winston-loki";
 import winston from "winston";
 
 export class LogFactory {

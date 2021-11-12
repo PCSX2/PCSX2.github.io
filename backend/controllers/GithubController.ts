@@ -25,7 +25,7 @@ export class GithubController {
   webhookHandler(req: Request, resp: Response) {
     const cid = uuidv4();
     this.log.info("Received request", req.headers);
-    let ghDigestRaw = req.header("x-hub-signature-256");
+    const ghDigestRaw = req.header("x-hub-signature-256");
     if (ghDigestRaw == undefined) {
       resp.send(403);
       return;
@@ -40,7 +40,7 @@ export class GithubController {
     );
     if (crypto.timingSafeEqual(digest, ghDigest)) {
       // Valid webhook from github, proceed
-      let body = req.body;
+      const body = req.body;
       if (
         "action" in body &&
         body.action == "published" &&
