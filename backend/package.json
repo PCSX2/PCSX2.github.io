@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "serve": "ts-node index.ts",
+    "serve": "ts-node -r dotenv/config index.ts",
     "build": "tsc -p .",
-    "start": "node ./dist/index.js"
+    "start": "node -r dotenv/config ./dist/index.js dotenv_config_path=./.env"
   },
   "engines": {
     "node": "16.x"
