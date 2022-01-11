@@ -150,17 +150,17 @@ $('document').ready(async function () {
 
     const releasesAndBuilds = await response.json();
 
-    if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.data.length > 0) {
-      latestRelease = releasesAndBuilds.stableReleases.data[0];
-      $('#latest-release-notes').append(`Latest stable release notes can be found <a href="${latestRelease.url}">here</a>`);
-      renderLatestRelease(latestRelease, "#latest-release-artifacts");
-    }
+    // if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.data.length > 0) {
+    //   latestRelease = releasesAndBuilds.stableReleases.data[0];
+    //   $('#latest-release-notes').append(`Latest stable release notes can be found <a href="${latestRelease.url}">here</a>`);
+    //   renderLatestRelease(latestRelease, "#latest-release-artifacts");
+    // }
 
-    if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.data.length > 1) {
-      prevStableReleases = releasesAndBuilds.stableReleases.data;
-      totalPrevStable = releasesAndBuilds.stableReleases.pageInfo.total;
-      renderPreviousReleases("stable", true);
-    }
+    // if ('stableReleases' in releasesAndBuilds && releasesAndBuilds.stableReleases.data.length > 1) {
+    //   prevStableReleases = releasesAndBuilds.stableReleases.data;
+    //   totalPrevStable = releasesAndBuilds.stableReleases.pageInfo.total;
+    //   renderPreviousReleases("stable", true);
+    // }
 
     if ('nightlyReleases' in releasesAndBuilds && releasesAndBuilds.nightlyReleases.data.length > 0) {
       latestNightly = releasesAndBuilds.nightlyReleases.data[0];
@@ -343,7 +343,7 @@ function renderPaginationButtons(category) {
     }));
   }
   $('.btn-pagination.page-stable').on('click', async function (evt) {
-    paginationHandler(evt);
+    // paginationHandler(evt);
   });
   $('.btn-pagination.page-nightly').on('click', async function (evt) {
     paginationHandler(evt);
@@ -425,7 +425,7 @@ async function paginationHandler(evt) {
       }
     }
     if (category == "stable") {
-      renderPreviousReleases(category, false);
+      // renderPreviousReleases(category, false);
     } else if (category == "nightly") {
       renderPreviousReleases(category, false);
     } else {
